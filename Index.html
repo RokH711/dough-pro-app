@@ -23,7 +23,6 @@
   <div class="container mx-auto p-6 max-w-4xl bg-white rounded-xl shadow-lg">
     <h1 class="text-4xl font-extrabold text-center mb-8 text-amber-800 tracking-tight">🥖 Dough Pro: Your Baking Companion</h1>
 
-    <!-- Navigation Tabs -->
     <div class="flex justify-center mb-8 border-b-2 border-amber-200">
       <button onclick="showPage('recipe', this)" class="tab-button px-6 py-3 mx-2 text-lg text-amber-700 hover:text-amber-900 focus:outline-none transition-all duration-300 active">Recipe</button>
       <button onclick="showPage('timers', this)" class="tab-button px-6 py-3 mx-2 text-lg text-amber-700 hover:text-amber-900 focus:outline-none transition-all duration-300">Timers</button>
@@ -34,7 +33,6 @@
       </a>
     </div>
 
-    <!-- Page 1: Recipe & Ambient Conditions -->
     <div id="recipe" class="page bg-amber-50 p-6 rounded-lg shadow-inner mb-6">
       <h2 class="text-2xl font-bold mb-5 text-amber-800">Recipe Input</h2>
       <div class="grid md:grid-cols-2 gap-6">
@@ -56,7 +54,7 @@
         </div>
         <div class="col-span-2">
           <label class="block text-sm font-medium text-amber-700 mb-1">Other Ingredients (g)</label>
-          <input type="number" id="other" min="0" class="w-full p-3 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="calculatePercentages()">
+          <input type="number" id="other" min="0" class="w-full p-3 border border-amber-300 rounded-md mt-3 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="calculatePercentages()">
           <input type="text" id="other-desc" placeholder="e.g., seeds, olives, herbs" class="w-full p-3 border border-amber-300 rounded-md mt-3 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200">
         </div>
         <div>
@@ -89,11 +87,9 @@
       </div>
     </div>
 
-    <!-- Page 2: Timers -->
     <div id="timers" class="page hidden bg-lime-50 p-6 rounded-lg shadow-inner mb-6">
       <h2 class="text-2xl font-bold mb-5 text-lime-800">Dough Development Timers</h2>
       <div class="grid md:grid-cols-2 gap-6">
-        <!-- Bulk Fermentation -->
         <div class="col-span-2">
           <label class="block text-sm font-medium text-lime-700 mb-1">Bulk Fermentation (h:m)</label>
           <input type="text" id="bulk-time" placeholder="e.g., 4:00" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
@@ -104,7 +100,6 @@
           </div>
           <div id="bulk-progress" class="text-lg mt-3 text-lime-800 font-semibold text-center"></div>
         </div>
-        <!-- Stretch & Folds -->
         <div class="col-span-2 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white p-4 rounded-md shadow-sm">
             <label class="block text-sm font-medium text-lime-700 mb-1">Stretch & Fold 1 (min)</label>
@@ -148,7 +143,6 @@
           </div>
         </div>
 
-        <!-- Final Proof -->
         <div class="col-span-2">
           <label class="block text-sm font-medium text-lime-700 mb-1">Final Proof / Cold Proof (h:m)</label>
           <input type="text" id="proof-time" placeholder="e.g., 4:00" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
@@ -166,11 +160,9 @@
       </div>
     </div>
 
-    <!-- Page 3: Oven Settings & Notes -->
     <div id="oven" class="page hidden bg-sky-50 p-6 rounded-lg shadow-inner mb-6">
       <h2 class="text-2xl font-bold mb-5 text-sky-800">Oven Settings & Notes</h2>
-      <div class="grid md:grid-cols-2 gap-6">
-        <div>
+      <div class="grid grid-cols-1 gap-6"> <div>
           <label class="block text-sm font-medium text-sky-700 mb-1">Preheat Oven Temp</label>
           <div class="flex">
             <input type="number" id="preheat-temp" min="0" class="w-full p-3 border border-sky-300 rounded-l-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" oninput="convertTemperatureDisplay('preheat-temp', 'preheat-unit')">
@@ -212,33 +204,27 @@
             </select>
           </div>
         </div>
-        <div class="col-span-2">
-          <label class="block text-sm font-medium text-sky-700 mb-1">Notes</label>
+        <div class="col-span-1"> <label class="block text-sm font-medium text-sky-700 mb-1">Notes</label>
           <textarea id="notes" class="w-full p-3 border border-sky-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" rows="5" placeholder="Crust, crumb, flavor, oven spring..."></textarea>
         </div>
-        <div class="col-span-2">
-          <label class="block text-sm font-medium text-sky-700 mb-1">Upload Photo</label>
+        <div class="col-span-1"> <label class="block text-sm font-medium text-sky-700 mb-1">Upload Photo</label>
           <input type="file" id="photo" accept="image/*" class="w-full p-3 border border-sky-300 rounded-md file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200 cursor-pointer">
           <img id="photo-preview" class="mt-4 max-w-full h-auto rounded-md shadow-md hidden object-cover" style="max-height: 200px;">
         </div>
-        <div class="col-span-2">
-          <label class="block text-sm font-medium text-sky-700 mb-1">Recipe Name (for saving)</label>
+        <div class="col-span-1"> <label class="block text-sm font-medium text-sky-700 mb-1">Recipe Name (for saving)</label>
           <input type="text" id="recipe-name" placeholder="My Perfect Sourdough" class="w-full p-3 border border-sky-300 rounded-md mb-4 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200">
           <button onclick="saveBake()" class="w-full px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">Save Bake Details & Recipe</button>
         </div>
       </div>
     </div>
 
-    <!-- Page 4: Saved Bakes -->
     <div id="savedBakes" class="page hidden bg-purple-50 p-6 rounded-lg shadow-inner mb-6">
       <h2 class="text-2xl font-bold mb-5 text-purple-800">Your Saved Bakes</h2>
       <div id="saved-bakes-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Saved bakes will be loaded here -->
         <p class="text-purple-600" id="no-saved-bakes-message">No bakes saved yet. Save a recipe from the 'Oven & Notes' tab!</p>
       </div>
     </div>
 
-    <!-- Hidden audio element for the alarm sound -->
     <audio id="alarmSound" loop preload="auto">
       <source src="https://assets.mixkit.co/sfx/preview/mixkit-analog-alarm-clock-bell-1456.mp3" type="audio/mpeg">
       Your browser does not support the audio element.
