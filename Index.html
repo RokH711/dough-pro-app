@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dough Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom styles for active tab and general enhancements */
+    .tab-button.active {
+      background-color: #3B82F6; /* Tailwind blue-500 */
+      color: white;
+      font-weight: 600;
+      border-bottom: 3px solid #1D4ED8; /* Tailwind blue-700 */
+    }
+    /* Hidden class for JS toggling */
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-amber-50 to-amber-100 min-h-screen flex items-center justify-center py-10 font-sans">
+  <div class="container mx-auto p-6 max-w-4xl bg-white rounded-xl shadow-lg">
+    <h1 class="text-4xl font-extrabold text-center mb-8 text-amber-800 tracking-tight">🥖 Dough Pro: Your Baking Companion</h1>
+
+    <div class="flex justify-center mb-8 border-b-2 border-amber-200">
+      <button onclick="showPage('recipe', this)" class="tab-button px-6 py-3 mx-2 text-lg text-amber-700 hover:text-amber-900 focus:outline-none transition-all duration-300 active">Recipe</button>
+      <button onclick="showPage('timers', this)" class="tab-button px-6 py-3 mx-2 text-lg text-amber-700 hover:text-amber-900 focus:outline-none transition-all duration-300">Timers</button>
+      <button onclick="showPage('oven', this)" class="tab-button px-6 py-3 mx-2 text-lg text-amber-700 hover:text-amber-900 focus:outline-none transition-all duration-300">Oven & Notes</button>
+      <button onclick="showPage('savedBakes', this)" class="tab-button px-6 py-3 mx-2 text-lg text-amber-700 hover:text-amber-900 focus:outline-none transition-all duration-300">Saved Bakes</button>
+      <a href="https://ko-fi.com/rokh321836" target="_blank" class="tab-button px-6 py-3 mx-2 text-lg bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center">
+        ❤️ Donate
+      </a>
+    </div>
+
+    <div id="recipe" class="page bg-amber-50 p-6 rounded-lg shadow-inner mb-6">
+      <h2 class="text-2xl font-bold mb-5 text-amber-800">Recipe Input</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-amber-700 mb-1">Sourdough Starter / Yeast (g)</label>
+          <input type="number" id="starter" min="0" class="w-full p-3 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="calculatePercentages()">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-amber-700 mb-1">Flour (g)</label>
+          <input type="number" id="flour" min="0" class="w-full p-3 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="calculatePercentages()">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-amber-700 mb-1">Water (g)</label>
+          <input type="number" id="water" min="0" class="w-full p-3 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="calculatePercentages()">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-amber-700 mb-1">Salt (g)</label>
+          <input type="number" id="salt" min="0" class="w-full p-3 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="calculatePercentages()">
+        </div>
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-amber-700 mb-1">Other Ingredients (g)</label>
+          <input type="number" id="other" min="0" class="w-full p-3 border border-amber-300 rounded-md mt-3 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="calculatePercentages()">
+          <input type="text" id="other-desc" placeholder="e.g., seeds, olives, herbs" class="w-full p-3 border border-amber-300 rounded-md mt-3 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-amber-700 mb-1">Ambient Temperature</label>
+          <div class="flex">
+            <input type="number" id="temp" min="0" class="w-full p-3 border border-amber-300 rounded-l-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" oninput="suggestProofTime(); convertTemperatureDisplay('temp', 'temp-unit')">
+            <select id="temp-unit" class="p-3 border border-amber-300 rounded-r-md bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200" onchange="suggestProofTime(); convertTemperatureDisplay('temp', 'temp-unit')">
+              <option value="C">°C</option>
+              <option value="F">°F</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-amber-700 mb-1">Hydration</label>
+            <input type="text" id="hydration" readonly class="w-full p-3 border border-amber-300 rounded-md bg-amber-100 text-amber-800 font-semibold">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-amber-700 mb-1">Salt Percentage</label>
+            <input type="text" id="salt-percentage" readonly class="w-full p-3 border border-amber-300 rounded-md bg-amber-100 text-amber-800 font-semibold">
+          </div>
+        </div>
+        <div class="col-span-2 mt-4 p-4 bg-amber-100 rounded-md">
+            <label class="block text-sm font-medium text-amber-700 mb-2">Scale Recipe to Target Flour Weight (g)</label>
+            <div class="flex gap-2">
+                <input type="number" id="target-flour" min="1" placeholder="e.g., 500" class="w-full p-3 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200">
+                <button onclick="scaleRecipe()" class="px-5 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition duration-200">Scale</button>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="timers" class="page hidden bg-lime-50 p-6 rounded-lg shadow-inner mb-6">
+      <h2 class="text-2xl font-bold mb-5 text-lime-800">Dough Development Timers</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-lime-700 mb-1">Bulk Fermentation (h:m)</label>
+          <input type="text" id="bulk-time" placeholder="e.g., 4:00" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
+          <div class="flex gap-3 mt-3">
+            <button onclick="startTimer('bulk')" class="flex-1 px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">Start</button>
+            <button onclick="pauseTimer('bulk')" class="flex-1 px-5 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 transition duration-200">Pause</button>
+            <button onclick="resetTimer('bulk')" class="flex-1 px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">Reset</button>
+          </div>
+          <div id="bulk-progress" class="text-lg mt-3 text-lime-800 font-semibold text-center"></div>
+        </div>
+        <div class="col-span-2 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-md shadow-sm">
+            <label class="block text-sm font-medium text-lime-700 mb-1">Stretch & Fold 1 (min)</label>
+            <input type="number" id="sf1-time" min="0" value="30" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
+            <div class="flex gap-2 mt-3 text-sm">
+              <button onclick="startTimer('sf1')" class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">Start</button>
+              <button onclick="pauseTimer('sf1')" class="px-3 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500">Pause</button>
+              <button onclick="resetTimer('sf1')" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">Reset</button>
+            </div>
+            <div id="sf1-progress" class="text-sm mt-2 text-lime-700 text-center"></div>
+          </div>
+          <div class="bg-white p-4 rounded-md shadow-sm">
+            <label class="block text-sm font-medium text-lime-700 mb-1">Stretch & Fold 2 (min)</label>
+            <input type="number" id="sf2-time" min="0" value="30" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
+            <div class="flex gap-2 mt-3 text-sm">
+              <button onclick="startTimer('sf2')" class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">Start</button>
+              <button onclick="pauseTimer('sf2')" class="px-3 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500">Pause</button>
+              <button onclick="resetTimer('sf2')" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">Reset</button>
+            </div>
+            <div id="sf2-progress" class="text-sm mt-2 text-lime-700 text-center"></div>
+          </div>
+          <div class="bg-white p-4 rounded-md shadow-sm">
+            <label class="block text-sm font-medium text-lime-700 mb-1">Stretch & Fold 3 (min)</label>
+            <input type="number" id="sf3-time" min="0" value="30" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
+            <div class="flex gap-2 mt-3 text-sm">
+              <button onclick="startTimer('sf3')" class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">Start</button>
+              <button onclick="pauseTimer('sf3')" class="px-3 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500">Pause</button>
+              <button onclick="resetTimer('sf3')" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">Reset</button>
+            </div>
+            <div id="sf3-progress" class="text-sm mt-2 text-lime-700 text-center"></div>
+          </div>
+          <div class="bg-white p-4 rounded-md shadow-sm">
+            <label class="block text-sm font-medium text-lime-700 mb-1">Stretch & Fold 4 (min)</label>
+            <input type="number" id="sf4-time" min="0" value="30" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
+            <div class="flex gap-2 mt-3 text-sm">
+              <button onclick="startTimer('sf4')" class="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600">Start</button>
+              <button onclick="pauseTimer('sf4')" class="px-3 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500">Pause</button>
+              <button onclick="resetTimer('sf4')" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">Reset</button>
+            </div>
+            <div id="sf4-progress" class="text-sm mt-2 text-lime-700 text-center"></div>
+          </div>
+        </div>
+
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-lime-700 mb-1">Final Proof / Cold Proof (h:m)</label>
+          <input type="text" id="proof-time" placeholder="e.g., 4:00" class="w-full p-3 border border-lime-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition duration-200">
+          <div class="flex items-center gap-2 mt-3">
+            <input type="checkbox" id="cold-proof" onchange="suggestProofTime()" class="h-5 w-5 text-lime-600 rounded focus:ring-lime-500">
+            <label for="cold-proof" class="text-lime-700">Cold Proof (Fridge)</label>
+          </div>
+          <div class="flex gap-3 mt-3">
+            <button onclick="startTimer('proof')" class="flex-1 px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">Start</button>
+            <button onclick="pauseTimer('proof')" class="flex-1 px-5 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 transition duration-200">Pause</button>
+            <button onclick="resetTimer('proof')" class="flex-1 px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">Reset</button>
+          </div>
+          <div id="proof-progress" class="text-lg mt-3 text-lime-800 font-semibold text-center"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="oven" class="page hidden bg-sky-50 p-6 rounded-lg shadow-inner mb-6">
+      <h2 class="text-2xl font-bold mb-5 text-sky-800">Oven Settings & Notes</h2>
+      <div class="grid grid-cols-1 gap-6"> <div>
+          <label class="block text-sm font-medium text-sky-700 mb-1">Preheat Oven Temp</label>
+          <div class="flex">
+            <input type="number" id="preheat-temp" min="0" class="w-full p-3 border border-sky-300 rounded-l-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" oninput="convertTemperatureDisplay('preheat-temp', 'preheat-unit')">
+            <select id="preheat-unit" class="p-3 border border-sky-300 rounded-r-md bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" onchange="convertTemperatureDisplay('preheat-temp', 'preheat-unit')">
+              <option value="C">°C</option>
+              <option value="F">°F</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-sky-700 mb-1">Bake Covered Temp & Duration</label>
+          <div class="flex gap-2">
+            <input type="number" id="covered-temp" min="0" class="w-full p-3 border border-sky-300 rounded-l-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" oninput="convertTemperatureDisplay('covered-temp', 'covered-unit')">
+            <input type="number" id="covered-time" min="0" placeholder="min" class="w-24 p-3 border border-sky-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200">
+            <select id="covered-unit" class="p-3 border border-sky-300 rounded-r-md bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" onchange="convertTemperatureDisplay('covered-temp', 'covered-unit')">
+              <option value="C">°C</option>
+              <option value="F">°F</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-sky-700 mb-1">Bake Uncovered Temp & Duration</label>
+          <div class="flex gap-2">
+            <input type="number" id="uncovered-temp" min="0" class="w-full p-3 border border-sky-300 rounded-l-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" oninput="convertTemperatureDisplay('uncovered-temp', 'uncovered-unit')">
+            <input type="number" id="uncovered-time" min="0" placeholder="min" class="w-24 p-3 border border-sky-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200">
+            <select id="uncovered-unit" class="p-3 border border-sky-300 rounded-r-md bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" onchange="convertTemperatureDisplay('uncovered-temp', 'uncovered-unit')">
+              <option value="C">°C</option>
+              <option value="F">°F</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-sky-700 mb-1">Internal Dough Temp (Post-Bake)</label>
+          <div class="flex">
+            <input type="number" id="internal-temp" min="0" class="w-full p-3 border border-sky-300 rounded-l-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" oninput="convertTemperatureDisplay('internal-temp', 'internal-unit')">
+            <select id="internal-unit" class="p-3 border border-sky-300 rounded-r-md bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" onchange="convertTemperatureDisplay('internal-temp', 'internal-unit')">
+              <option value="C">°C</option>
+              <option value="F">°F</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-span-1"> <label class="block text-sm font-medium text-sky-700 mb-1">Notes</label>
+          <textarea id="notes" class="w-full p-3 border border-sky-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200" rows="5" placeholder="Crust, crumb, flavor, oven spring..."></textarea>
+        </div>
+        <div class="col-span-1"> <label class="block text-sm font-medium text-sky-700 mb-1">Upload Photo</label>
+          <input type="file" id="photo" accept="image/*" class="w-full p-3 border border-sky-300 rounded-md file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200 cursor-pointer">
+          <img id="photo-preview" class="mt-4 max-w-full h-auto rounded-md shadow-md hidden object-cover" style="max-height: 200px;">
+        </div>
+        <div class="col-span-1"> <label class="block text-sm font-medium text-sky-700 mb-1">Recipe Name (for saving)</label>
+          <input type="text" id="recipe-name" placeholder="My Perfect Sourdough" class="w-full p-3 border border-sky-300 rounded-md mb-4 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-200">
+          <button onclick="saveBake()" class="w-full px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">Save Bake Details & Recipe</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="savedBakes" class="page hidden bg-purple-50 p-6 rounded-lg shadow-inner mb-6">
+      <h2 class="text-2xl font-bold mb-5 text-purple-800">Your Saved Bakes</h2>
+      <div id="saved-bakes-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <p class="text-purple-600" id="no-saved-bakes-message">No bakes saved yet. Save a recipe from the 'Oven & Notes' tab!</p>
+      </div>
+    </div>
+
+    <audio id="alarmSound" loop preload="auto">
+      <source src="https://assets.mixkit.co/sfx/preview/mixkit-analog-alarm-clock-bell-1456.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+
+  <script>
+    let timers = {
+      bulk: { interval: null, seconds: 0, running: false, initialSeconds: 0 },
+      sf1: { interval: null, seconds: 0, running: false, initialSeconds: 0 },
+      sf2: { interval: null, seconds: 0, running: false, initialSeconds: 0 },
+      sf3: { interval: null, seconds: 0, running: false, initialSeconds: 0 },
+      sf4: { interval: null, seconds: 0, running: false, initialSeconds: 0 },
+      proof: { interval: null, seconds: 0, running: false, initialSeconds: 0 }
+    };
+
+    const RECIPES_KEY = 'breadWiseSavedRecipes'; // Still using this for consistency, though BAKES_KEY is more active
+    const BAKES_KEY = 'doughProBakeLogs'; // Changed key for bake logs to reflect new app name
+
+    const alarmAudio = document.getElementById('alarmSound');
+
+    function playAlarm() {
+        if (alarmAudio.paused) {
+            alarmAudio.currentTime = 0; // Rewind to start in case it played before
+            alarmAudio.play().catch(e => console.error("Error playing alarm:", e));
+        }
+    }
+
+    function stopAlarm() {
+        alarmAudio.pause();
+        alarmAudio.currentTime = 0; // Rewind to start
+    }
+
+    function showPage(pageId, clickedButton) {
+      document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+      document.getElementById(pageId).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+      // Ensure the Donate button doesn't get the 'active' class as it's a link
+      if (clickedButton && !clickedButton.href) { 
+        clickedButton.classList.add('active');
+      }
+
+      if (pageId === 'savedBakes') {
+        loadSavedBakes();
+      }
+      stopAlarm(); // Stop any alarms when switching pages
+    }
+
+    function calculatePercentages() {
+      const flour = parseFloat(document.getElementById('flour').value) || 0;
+      const water = parseFloat(document.getElementById('water').value) || 0;
+      const salt = parseFloat(document.getElementById('salt').value) || 0;
+      const hydration = flour > 0 ? ((water / flour) * 100).toFixed(1) : 0;
+      const saltPercentage = flour > 0 ? ((salt / flour) * 100).toFixed(1) : 0;
+      document.getElementById('hydration').value = `${hydration}%`;
+      document.getElementById('salt-percentage').value = `${saltPercentage}%`;
+    }
+
+    // --- Temperature Conversion Functions ---
+    function convertCelsiusToFahrenheit(celsius) {
+      return (celsius * 9 / 5) + 32;
+    }
+
+    function convertFahrenheitToCelsius(fahrenheit) {
+      return (fahrenheit - 32) * 5 / 9;
+    }
+
+    function convertTemperatureDisplay(inputId, unitId) {
+        const inputElement = document.getElementById(inputId);
+        const unitElement = document.getElementById(unitId);
+        let tempValue = parseFloat(inputElement.value);
+
+        if (isNaN(tempValue)) return;
+
+        const currentDisplayedUnit = unitElement.value;
+        const previousStoredUnit = inputElement.dataset.unit || currentDisplayedUnit;
+
+        if (currentDisplayedUnit !== previousStoredUnit) {
+            if (currentDisplayedUnit === 'F') {
+                inputElement.value = convertCelsiusToFahrenheit(tempValue).toFixed(0);
+            } else { // 'C'
+                inputElement.value = convertFahrenheitToCelsius(tempValue).toFixed(0);
+            }
+        }
+        inputElement.dataset.unit = currentDisplayedUnit;
+
+        if (inputId === 'temp') {
+            suggestProofTime();
+        }
+    }
+    // --- End Temperature Conversion Functions ---
+
+    function suggestProofTime() {
+      const temp = parseFloat(document.getElementById('temp').value) || 20;
+      const unit = document.getElementById('temp-unit').value;
+      const isColdProof = document.getElementById('cold-proof').checked;
+      let celsius = unit === 'F' ? convertFahrenheitToCelsius(temp) : temp;
+      let hours;
+
+      if (isColdProof) {
+        hours = '12:00'; // Default for cold proof
+      } else {
+        if (celsius < 18) hours = '8:00';
+        else if (celsius <= 24) hours = '6:00';
+        else hours = '4:00';
+      }
+      document.getElementById('proof-time').value = hours;
+    }
+
+    function getFemaleVoice() {
+      const voices = speechSynthesis.getVoices();
+      return voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.includes('Google US English') ||
+        voice.name.includes('Samantha') ||
+        voice.lang.includes('en-')
+      ) || voices[0];
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = getFemaleVoice();
+      utterance.pitch = 1.2;
+      utterance.rate = 1;
+      // After speech, play the alarm
+      utterance.onend = () => {
+        playAlarm();
+      };
+      speechSynthesis.speak(utterance);
+    }
+
+    function startTimer(id) {
+      if (timers[id].running) return;
+
+      let input = document.getElementById(`${id}-time`).value;
+      let seconds = id === 'bulk' || id === 'proof' ? parseTime(input) : parseInt(input) * 60;
+      
+      if (seconds <= 0 || isNaN(seconds)) {
+        alert('Please set a valid time');
+        return;
+      }
+
+      stopAlarm(); // Stop any previous alarm when a new timer starts
+      timers[id].initialSeconds = seconds;
+      timers[id].seconds = seconds;
+      timers[id].running = true;
+
+      document.getElementById(`${id}-progress`).textContent = formatTime(timers[id].seconds);
+
+      timers[id].interval = setInterval(() => {
+        if (timers[id].seconds <= 0) {
+          document.getElementById(`${id}-progress`).textContent = 'Time\'s Up! Repeating Alarm...';
+          speak(`Attention! The ${id.replace('-', ' ')} timer has finished. Please check your bread.`);
+          timers[id].seconds = timers[id].initialSeconds; 
+        } else {
+          timers[id].seconds--;
+          document.getElementById(`${id}-progress`).textContent = formatTime(timers[id].seconds);
+        }
+      }, 1000);
+    }
+
+    function pauseTimer(id) {
+      if (timers[id].running) {
+        clearInterval(timers[id].interval);
+        timers[id].running = false;
+        document.getElementById(`${id}-progress`).textContent = `Paused at ${formatTime(timers[id].seconds)}`;
+        speechSynthesis.cancel();
+        stopAlarm(); // Stop the alarm when paused
+      }
+    }
+
+    function resetTimer(id) {
+      clearInterval(timers[id].interval);
+      timers[id].running = false;
+      timers[id].seconds = 0;
+      document.getElementById(`${id}-progress`).textContent = '';
+      speechSynthesis.cancel();
+      stopAlarm(); // Stop the alarm when reset
+
+      if (id === 'bulk' || id === 'proof') {
+        document.getElementById(`${id}-time`).value = '';
+      } else {
+        document.getElementById(`${id}-time`).value = '30';
+      }
+    }
+
+    function parseTime(timeStr) {
+      const parts = timeStr.split(':');
+      let hours = 0;
+      let minutes = 0;
+      if (parts.length === 2) {
+        hours = parseInt(parts[0]) || 0;
+        minutes = parseInt(parts[1]) || 0;
+      } else if (parts.length === 1) {
+        minutes = parseInt(parts[0]) || 0;
+      }
+      return (hours * 3600) + (minutes * 60);
+    }
+
+    function formatTime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // --- Save & Load Recipes / Bake Logs ---
+    function saveBake() {
+        const recipeName = document.getElementById('recipe-name').value.trim();
+        if (!recipeName) {
+            alert('Please enter a name for your recipe before saving.');
+            return;
+        }
+
+        const bakeId = Date.now().toString(); // Unique ID for each bake
+
+        const currentRecipe = {
+            starter: document.getElementById('starter').value,
+            flour: document.getElementById('flour').value,
+            water: document.getElementById('water').value,
+            salt: document.getElementById('salt').value,
+            other: document.getElementById('other').value,
+            otherDesc: document.getElementById('other-desc').value,
+            temp: document.getElementById('temp').value,
+            tempUnit: document.getElementById('temp-unit').value,
+            hydration: document.getElementById('hydration').value,
+            saltPercentage: document.getElementById('salt-percentage').value
+        };
+
+        const bakeDetails = {
+            id: bakeId,
+            name: recipeName,
+            date: new Date().toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+            time: new Date().toLocaleTimeString('en-AU'),
+            recipe: currentRecipe, // Store current recipe state
+            oven: {
+                preheat: document.getElementById('preheat-temp').value,
+                preheatUnit: document.getElementById('preheat-unit').value,
+                covered: document.getElementById('covered-temp').value,
+                coveredTime: document.getElementById('covered-time').value,
+                coveredUnit: document.getElementById('covered-unit').value,
+                uncovered: document.getElementById('uncovered-temp').value,
+                uncoveredTime: document.getElementById('uncovered-time').value,
+                uncoveredUnit: document.getElementById('uncovered-unit').value,
+                internal: document.getElementById('internal-temp').value,
+                internalUnit: document.getElementById('internal-unit').value
+            },
+            notes: document.getElementById('notes').value,
+            photo: document.getElementById('photo-preview').src.startsWith('data:') ? document.getElementById('photo-preview').src : '' // Save base64 image
+        };
+
+        // Load existing bake logs
+        let bakeLogs = JSON.parse(localStorage.getItem(BAKES_KEY) || '[]');
+        bakeLogs.push(bakeDetails);
+        localStorage.setItem(BAKES_KEY, JSON.stringify(bakeLogs));
+
+        alert(`Bake "${recipeName}" saved successfully!`);
+        console.log('Bake Data Saved:', bakeDetails);
+        document.getElementById('recipe-name').value = ''; // Clear recipe name field
+        document.getElementById('notes').value = ''; // Clear notes
+        document.getElementById('photo-preview').src = ''; // Clear photo preview
+        document.getElementById('photo-preview').classList.add('hidden'); // Hide photo preview
+        document.getElementById('photo').value = ''; // Clear file input
+        loadSavedBakes(); // Refresh the list
+    }
+
+    function loadSavedBakes() {
+        const savedBakesList = document.getElementById('saved-bakes-list');
+        savedBakesList.innerHTML = ''; // Clear current list
+        const noSavedBakesMessage = document.getElementById('no-saved-bakes-message');
+
+        let bakeLogs = JSON.parse(localStorage.getItem(BAKES_KEY) || '[]');
+
+        if (bakeLogs.length === 0) {
+            noSavedBakesMessage.classList.remove('hidden');
+            return;
+        } else {
+            noSavedBakesMessage.classList.add('hidden');
+        }
+
+        // Sort by date, newest first
+        bakeLogs.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+
+
+        bakeLogs.forEach(bake => {
+            const bakeCard = document.createElement('div');
+            bakeCard.className = 'bg-white p-4 rounded-md shadow-md hover:shadow-lg transition duration-200 relative';
+            bakeCard.innerHTML = `
+                <h3 class="text-xl font-semibold text-purple-700 mb-2">${bake.name}</h3>
+                <p class="text-sm text-gray-500 mb-3">${bake.date} at ${bake.time}</p>
+                ${bake.photo ? `<img src="${bake.photo}" alt="Baked Bread" class="w-full h-32 object-cover rounded-md mb-3">` : ''}
+                <div class="text-sm text-gray-700">
+                    <p><strong>Hydration:</strong> ${bake.recipe.hydration}</p>
+                    <p><strong>Salt:</strong> ${bake.recipe.saltPercentage}</p>
+                    <p><strong>Notes:</strong> ${bake.notes ? bake.notes.substring(0, 100) + (bake.notes.length > 100 ? '...' : '') : 'No notes.'}</p>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <button onclick="viewBakeDetails('${bake.id}')" class="px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600">View Details</button>
+                    <button onclick="deleteBake('${bake.id}')" class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600">Delete</button>
+                </div>
+            `;
+            savedBakesList.appendChild(bakeCard);
+        });
+    }
+
+    function viewBakeDetails(id) {
+        let bakeLogs = JSON.parse(localStorage.getItem(BAKES_KEY) || '[]');
+        const bake = bakeLogs.find(b => b.id === id);
+
+        if (!bake) {
+            alert('Bake not found!');
+            return;
+        }
+
+        // Populate the Recipe tab
+        document.getElementById('starter').value = bake.recipe.starter;
+        document.getElementById('flour').value = bake.recipe.flour;
+        document.getElementById('water').value = bake.recipe.water;
+        document.getElementById('salt').value = bake.recipe.salt;
+        document.getElementById('other').value = bake.recipe.other;
+        document.getElementById('other-desc').value = bake.recipe.otherDesc;
+        
+        // When loading, ensure the temp unit is set first, then value, then call conversion to ensure display is correct
+        document.getElementById('temp-unit').value = bake.recipe.tempUnit;
+        document.getElementById('temp').value = bake.recipe.temp;
+        document.getElementById('temp').dataset.unit = bake.recipe.tempUnit; // Set data attribute after setting value
+        
+        calculatePercentages(); // Recalculate based on loaded values
+
+        // Populate the Oven & Notes tab
+        document.getElementById('preheat-unit').value = bake.oven.preheatUnit;
+        document.getElementById('preheat-temp').value = bake.oven.preheat;
+        document.getElementById('preheat-temp').dataset.unit = bake.oven.preheatUnit;
+
+        document.getElementById('covered-unit').value = bake.oven.coveredUnit;
+        document.getElementById('covered-temp').value = bake.oven.covered;
+        document.getElementById('covered-temp').dataset.unit = bake.oven.coveredUnit;
+        document.getElementById('covered-time').value = bake.oven.coveredTime;
+        
+        document.getElementById('uncovered-unit').value = bake.oven.uncoveredUnit;
+        document.getElementById('uncovered-temp').value = bake.oven.uncovered;
+        document.getElementById('uncovered-temp').dataset.unit = bake.oven.uncoveredUnit;
+        document.getElementById('uncovered-time').value = bake.oven.uncoveredTime;
+        
+        document.getElementById('internal-unit').value = bake.oven.internalUnit;
+        document.getElementById('internal-temp').value = bake.oven.internal;
+        document.getElementById('internal-temp').dataset.unit = bake.oven.internalUnit;
+
+        document.getElementById('notes').value = bake.notes;
+        document.getElementById('recipe-name').value = bake.name; // Pre-fill name
+
+        if (bake.photo) {
+            document.getElementById('photo-preview').src = bake.photo;
+            document.getElementById('photo-preview').classList.remove('hidden');
+        } else {
+            document.getElementById('photo-preview').src = '';
+            document.getElementById('photo-preview').classList.add('hidden');
+        }
+        document.getElementById('photo').value = ''; // Clear file input as image is loaded from data
+
+        // Switch to the Recipe tab for easy editing/viewing
+        showPage('recipe', document.querySelector('.tab-button:nth-child(1)')); // Select Recipe button
+    }
+
+    function deleteBake(id) {
+        if (!confirm('Are you sure you want to delete this bake log?')) {
+            return;
+        }
+        let bakeLogs = JSON.parse(localStorage.getItem(BAKES_KEY) || '[]');
+        bakeLogs = bakeLogs.filter(b => b.id !== id);
+        localStorage.setItem(BAKES_KEY, JSON.stringify(bakeLogs));
+        loadSavedBakes(); // Refresh the list
+    }
+    // --- End Save & Load Recipes / Bake Logs ---
+
+    // --- Ingredient Scaling ---
+    function scaleRecipe() {
+        const targetFlour = parseFloat(document.getElementById('target-flour').value);
+        const currentFlour = parseFloat(document.getElementById('flour').value);
+
+        if (isNaN(targetFlour) || targetFlour <= 0) {
+            alert('Please enter a valid target flour weight.');
+            return;
+        }
+        if (isNaN(currentFlour) || currentFlour <= 0) {
+            alert('Please enter a current flour weight in the recipe input first.');
+            return;
+        }
+
+        const scalingFactor = targetFlour / currentFlour;
+
+        document.getElementById('starter').value = (parseFloat(document.getElementById('starter').value || 0) * scalingFactor).toFixed(1);
+        document.getElementById('flour').value = targetFlour.toFixed(1); // Set to target directly
+        document.getElementById('water').value = (parseFloat(document.getElementById('water').value || 0) * scalingFactor).toFixed(1);
+        document.getElementById('salt').value = (parseFloat(document.getElementById('salt').value || 0) * scalingFactor).toFixed(1);
+        document.getElementById('other').value = (parseFloat(document.getElementById('other').value || 0) * scalingFactor).toFixed(1);
+
+        calculatePercentages(); // Recalculate hydration and salt %
+        alert(`Recipe scaled to ${targetFlour}g flour!`);
+    }
+    // --- End Ingredient Scaling ---
+
+    document.getElementById('photo').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('photo-preview').src = e.target.result;
+          document.getElementById('photo-preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Ensure voices are loaded before first use
+    window.speechSynthesis.onvoiceschanged = () => {
+      // Voices are now available
+    };
+
+    // Initialize
+    showPage('recipe', document.querySelector('.tab-button'));
+    calculatePercentages();
+    suggestProofTime();
+
+    // Set initial data-unit for all temperature inputs
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('temp').dataset.unit = document.getElementById('temp-unit').value;
+        document.getElementById('preheat-temp').dataset.unit = document.getElementById('preheat-unit').value;
+        document.getElementById('covered-temp').dataset.unit = document.getElementById('covered-unit').value;
+        document.getElementById('uncovered-temp').dataset.unit = document.getElementById('uncovered-unit').value;
+        document.getElementById('internal-temp').dataset.unit = document.getElementById('internal-unit').value;
+    });
+
+  </script>
+</body>
+</html>
